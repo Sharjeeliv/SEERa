@@ -7,7 +7,7 @@ ROUNDING_FACTOR: int = 2
 
 
 def generate_dataset(time_interval: int, users: int, scenario: int):
-    dataset = np.round(np.random.uniform(0.0, 1.0, size=(users, users)), ROUNDING_FACTOR)
+    dataset = generate_user_similarity_matrix(users)
     mask = inc_and_dec_scenario_mask(users)
     save_dataset(dataset, scenario, 1)
     print("Original dataset:\n", dataset, "\n")
@@ -28,7 +28,17 @@ def generate_dataset(time_interval: int, users: int, scenario: int):
 
         dataset = dataset.clip(0, 1)  # Value must be between 0 and 1
         save_dataset(dataset, scenario, day)
-        # print(f"New dataset on iteration {day}:\n", dataset, "\n")
+        print(f"New dataset on iteration {day}:\n", dataset, "\n")
+
+
+def generate_user_similarity_matrix(users: int) -> np.ndarray:
+    dataset = symmetrize(np.random.uniform(0.0, 1.0, size=(users, users)))
+    np.fill_diagonal(dataset, 1)  # A User is similar to themselves
+    return np.round(dataset, ROUNDING_FACTOR)
+
+
+def symmetrize(np_array: np.ndarray)-> np.ndarray:
+    return (np_array + np_array.transpose()) / 2
 
 
 def generate_dateset_change(np_array: np.ndarray, day: int) -> np.ndarray:
@@ -52,4 +62,4 @@ def save_dataset(dataset: np.ndarray, scenario: int, day: int):
 
 
 if __name__ == '__main__':
-    generate_dataset(3, 3, 2)
+    generate_dataset(3, 3, 3)
